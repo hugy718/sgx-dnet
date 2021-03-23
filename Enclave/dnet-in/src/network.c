@@ -51,6 +51,7 @@ load_args get_base_args(network *net)
 
 network *load_network(list *sections, char *weights, int clear)
 {
+    printf("create network..\n");
     network *net = create_net_in(sections);
     if(weights && weights[0] != 0){
         load_weights(net, weights);
@@ -647,7 +648,7 @@ matrix network_predict_data(network *net, data test)
     int k = net->outputs;
     matrix pred = make_matrix(test.X.rows, k);
     float *X = calloc(net->batch * test.X.cols, sizeof(float));
-    for (i = 0; i < test.X.rows; i += net->batch)
+    for (i = 0; i < net->batch; i += net->batch)
     {
         for (b = 0; b < net->batch; ++b)
         {

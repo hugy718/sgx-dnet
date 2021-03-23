@@ -812,6 +812,7 @@ int is_network(section *s)
 
 network *create_net_in(list *sections)
 {
+    printf("start create..\n");
     //list *sections = read_cfg(filename);
     node *n = sections->front;
     if (!n)
@@ -1013,6 +1014,8 @@ network *create_net_in(list *sections)
     net->input = calloc(net->inputs * net->batch, sizeof(float));
     net->truth = calloc(net->truths * net->batch, sizeof(float));
 
+    printf("create finished..\n");
+
     if (workspace_size)
     {
 
@@ -1127,6 +1130,7 @@ void save_weights_upto(network *net, char *filename, int cutoff)
     fwrite(&revision, sizeof(int), 1, fp);
     fwrite(net->seen, sizeof(size_t), 1, fp);
 
+    printf("net size: %d\n", net->n);
     int i;
     for (i = 0; i < net->n && i < cutoff; ++i)
     {
@@ -1188,14 +1192,12 @@ void save_weights_upto(network *net, char *filename, int cutoff)
         }
         if (l.type == LOCAL)
         {
-
             int locations = l.out_w * l.out_h;
             int size = l.size * l.size * l.c * l.n * locations;
             fwrite(l.biases, sizeof(float), l.outputs, fp);
             fwrite(l.weights, sizeof(float), size, fp);
         }
     }
-  
 }
 void save_weights(network *net, char *filename)
 {

@@ -8,6 +8,8 @@
 #include "App.h"
 #include "ErrorSupport.h"
 
+#include <ctime>
+
 /* For romulus */
 #define MAX_PATH FILENAME_MAX
 
@@ -24,7 +26,7 @@ data training_data, test_data;
  */
 #define CIFAR_CFG_FILE "./App/dnet-out/cfg/cifar.cfg"
 #define CIFAR_TEST_DATA "./App/dnet-out/data/cifar/cifar-10-batches-bin/test_batch.bin"
-#define TINY_IMAGE "./App/dnet-out/data/person.jpg"
+#define TINY_IMAGE "./App/dnet-out/data/eagle.jpg"
 #define TINY_CFG "./App/dnet-out/cfg/tiny.cfg"
 #define DATA_CFG "./App/dnet-out/data/tiny.data"
 #define MNIST_TRAIN_IMAGES "./App/dnet-out/data/mnist/train-images-idx3-ubyte"
@@ -57,7 +59,7 @@ void train_cifar(char *cfgfile)
 
     //Load training data
     training_data = load_all_cifar10();
-    /**
+    /**Done training cifar model..
      * The enclave will create a secure network struct in enclave memory
      * using the parameters in the sections variable
      */
@@ -81,7 +83,15 @@ void test_cifar(char *cfgfile)
      * The enclave will create a secure network struct in enclave memory
      * using the parameters in the sections variable
      */
+
+    // Record end time
+    auto test_start = std::chrono::high_resolution_clock::now();
     ecall_tester(global_eid, sections, &test_data, 0);
+    // Record end time
+    auto test_finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> test_elapsed = test_finish - test_start;
+    std::cout << "Test 10k images inside enclave time: " << test_elapsed.count() << " s\n";
+
     printf("Testing complete..\n");
     free_data(test_data);
 }
@@ -92,12 +102,14 @@ void test_cifar(char *cfgfile)
  */
 void test_tiny(char *cfgfile)
 {
+    printf("Start prediction..\n");
     //read network config file
     list *sections = read_cfg(cfgfile);
     //read labels
     list *options = read_data_cfg(DATA_CFG);
     char *name_list = option_find_str(options, "names", 0);
     list *plist = get_paths(name_list);
+    printf("Read labels finished..\n");
 
     //read image file
     char *file = TINY_IMAGE;
@@ -105,6 +117,7 @@ void test_tiny(char *cfgfile)
     char *input = buff;
     strncpy(input, file, 256);
     image im = load_image_color(input, 0, 0);
+    printf("Read image finished..\n");
 
     //classify image in enclave
     ecall_classify(global_eid, sections, plist, &im);
@@ -144,7 +157,14 @@ void test_mnist(char *cfgfile)
     test.y = load_mnist_labels(label_path);
     list *sections = read_cfg(cfgfile);
 
+    // Record end time
+    auto test_start = std::chrono::high_resolution_clock::now();
     ecall_tester(global_eid, sections, &test, 0);
+    // Record end time
+    auto test_finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> test_elapsed = test_finish - test_start;
+    std::cout << "Test 10k images inside enclave time: " << test_elapsed.count() << " s\n";
+
     printf("Mnist testing complete..\n");
     free_data(test);
 }
@@ -176,6 +196,9 @@ int SGX_CDECL main(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
+    // Record end time
+    auto init_enclave_start = std::chrono::high_resolution_clock::now();
+
     sgx_status_t ret;
 
     /* Initialize the enclave */
@@ -186,14 +209,19 @@ int SGX_CDECL main(int argc, char *argv[])
         return -1;
     }
 
+    // Record end time
+    auto init_enclave_finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = init_enclave_finish - init_enclave_start;
+    std::cout << "Elapsed enclave launch time: " << elapsed.count() << " s\n";
+
     //Create NUM_THRREADS threads
     //std::thread trd[NUM_THREADS];
 
     //train_cifar(CIFAR_CFG_FILE);
-    //test_cifar(CIFAR_CFG_FILE);
+    test_cifar(CIFAR_CFG_FILE);
     //test_tiny(TINY_CFG);
     //train_mnist(MNIST_CFG);
-    test_mnist(MNIST_CFG);
+    //test_mnist(MNIST_CFG);
 
     /*  
     for (int i = 0; i < NUM_THREADS; i++)

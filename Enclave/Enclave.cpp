@@ -35,6 +35,5 @@ void fread(void *ptr, size_t size, size_t nmemb, int fp)
 
 void fwrite(void *ptr, size_t size, size_t nmemb, int fp)
 {
-
     ocall_fwrite(ptr, size, nmemb);
 }

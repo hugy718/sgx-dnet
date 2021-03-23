@@ -4,12 +4,12 @@
 #include "trainer.h"
 #include "checks.h"
 
-#define CIFAR_WEIGHTS "/home/ubuntu/xxx/sgx-dnet/App/dnet-out/backup/cifar.weights"
-#define TINY_WEIGHTS "/home/ubuntu/xxx/sgx-dnet/App/dnet-out/backup/tiny.weights"
-#define MNIST_WEIGHTS "/home/ubuntu/xxx/sgx-dnet/App/dnet-out/backup/mnist.weights"
+#define CIFAR_WEIGHTS "/home/wuyuncheng/Documents/projects/sgx-dnet/App/dnet-out/backup/cifar.weights"
+#define TINY_WEIGHTS "/home/wuyuncheng/Documents/projects/sgx-dnet/App/dnet-out/backup/tiny.weights"
+#define MNIST_WEIGHTS "/home/wuyuncheng/Documents/projects/sgx-dnet/App/dnet-out/backup/mnist.weights"
 
 //global network model
-//network *net = NULL;
+//network *net = NULL;ste
 
 /**
  * Pxxx
@@ -29,8 +29,8 @@ void ecall_trainer(list *sections, data *training_data, int pmem)
      * before any assignment 
      */
     sgx_lfence();
-    train_mnist(sections, training_data, pmem);
-    //train_cifar(sections, training_data, pmem);
+    //train_mnist(sections, training_data, pmem);
+    train_cifar(sections, training_data, pmem);
 }
 
 /**
@@ -131,7 +131,8 @@ void ecall_tester(list *sections, data *test_data, int pmem)
      * before any assignment 
      */
     sgx_lfence();
-    test_mnist(sections, test_data, pmem);
+    //test_mnist(sections, test_data, pmem);
+    test_cifar(sections, test_data, pmem);
 }
 
 void ecall_classify(list *sections, list *labels, image *im)
@@ -235,7 +236,7 @@ void test_cifar(list *sections, data *test_data, int pmem)
  */
 void classify_tiny(list *sections, list *labels, image *img, int top)
 {
-
+    printf("Begin loading trained network model in enclave..\n");
     network *net = load_network(sections, TINY_WEIGHTS, 0);
     printf("Done loading trained network model in enclave..\n");
     set_batch_network(net, 1);
