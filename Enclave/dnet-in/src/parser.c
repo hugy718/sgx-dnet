@@ -33,6 +33,8 @@
 #include "softmax_layer.h"
 #include "lstm_layer.h"
 #include "utils.h"
+#include <stdio.h>
+#include <string.h>
 
 // global gpu index variable used by cuda --> NB: cuda not supported in sgx
 int gpu_index = 0;
@@ -1114,6 +1116,127 @@ void save_connected_weights(layer l, int fp)
     }
 }
 
+void to_array(char *foldername, int size, int number, char *filename)
+{
+    printf("foldername size = %d\n", size);
+    int n;
+    if (number == 0) {
+        n = 1;
+    } else {
+        n = log10(number) + 1;
+    }
+    printf("n = %d\n", n);
+    int i;
+    char number_array[256]; // = calloc(n + size, sizeof(char));
+    for (i = 0; i < size; i++)
+    {
+        //printf("i = %d\n", i);
+        number_array[i] = foldername[i];
+    }
+    printf("number array = %s\n", number_array);
+    for (i = n-1; i >= 0; --i, number /= 10)
+    {
+        printf("i = %d\n", i);
+        number_array[size + i] = (number % 10) + '0';
+    }
+    printf("filename = %s\n", number_array);
+    for (int j = 0; j < size + n; j++) {
+        filename[j] = number_array[j];
+    }
+}
+
+void save_weights_by_layer(network *net, char *foldername, int cutoff)
+{
+#ifdef DNET_SGX_DEBUG
+    printf("Saving weights to folder %s\n", foldername);
+#endif
+    int fp = 0;
+    int major = 0;
+    int minor = 2;
+    int revision = 0;
+    printf("net size: %d\n", net->n);
+    int i;
+    int size = strlen(foldername);
+    for (i = 0; i < net->n && i < cutoff; i++)
+    {
+        char filename[256];
+        to_array(foldername, size, i, filename);
+        printf("filename: %s\n", filename);
+        ocall_open_file(filename, O_WRONLY);
+        if (i == 0)
+        {
+            fwrite(&major, sizeof(int), 1, fp);
+            fwrite(&minor, sizeof(int), 1, fp);
+            fwrite(&revision, sizeof(int), 1, fp);
+            fwrite(net->seen, sizeof(size_t), 1, fp);
+        }
+        layer l = net->layers[i];
+        if (l.dontsave)
+            continue;
+        if (l.type == CONVOLUTIONAL || l.type == DECONVOLUTIONAL)
+        {
+            save_convolutional_weights(l, fp);
+        }
+        if (l.type == CONNECTED)
+        {
+            save_connected_weights(l, fp);
+        }
+        if (l.type == BATCHNORM)
+        {
+            save_batchnorm_weights(l, fp);
+        }
+        if (l.type == RNN)
+        {
+            save_connected_weights(*(l.input_layer), fp);
+            save_connected_weights(*(l.self_layer), fp);
+            save_connected_weights(*(l.output_layer), fp);
+        }
+        if (l.type == LSTM)
+        {
+            save_connected_weights(*(l.wi), fp);
+            save_connected_weights(*(l.wf), fp);
+            save_connected_weights(*(l.wo), fp);
+            save_connected_weights(*(l.wg), fp);
+            save_connected_weights(*(l.ui), fp);
+            save_connected_weights(*(l.uf), fp);
+            save_connected_weights(*(l.uo), fp);
+            save_connected_weights(*(l.ug), fp);
+        }
+        if (l.type == GRU)
+        {
+            if (1)
+            {
+                save_connected_weights(*(l.wz), fp);
+                save_connected_weights(*(l.wr), fp);
+                save_connected_weights(*(l.wh), fp);
+                save_connected_weights(*(l.uz), fp);
+                save_connected_weights(*(l.ur), fp);
+                save_connected_weights(*(l.uh), fp);
+            }
+            else
+            {
+                save_connected_weights(*(l.reset_layer), fp);
+                save_connected_weights(*(l.update_layer), fp);
+                save_connected_weights(*(l.state_layer), fp);
+            }
+        }
+        if (l.type == CRNN)
+        {
+            save_convolutional_weights(*(l.input_layer), fp);
+            save_convolutional_weights(*(l.self_layer), fp);
+            save_convolutional_weights(*(l.output_layer), fp);
+        }
+        if (l.type == LOCAL)
+        {
+            int locations = l.out_w * l.out_h;
+            int size = l.size * l.size * l.c * l.n * locations;
+            fwrite(l.biases, sizeof(float), l.outputs, fp);
+            fwrite(l.weights, sizeof(float), size, fp);
+        }
+        ocall_close_file();
+    }
+}
+
 void save_weights_upto(network *net, char *filename, int cutoff)
 {
 
@@ -1202,9 +1325,10 @@ void save_weights_upto(network *net, char *filename, int cutoff)
 void save_weights(network *net, char *filename)
 {
     //create and open backup file
-    ocall_open_file(filename, O_WRONLY); 
-    save_weights_upto(net, filename, net->n);
-    ocall_close_file();
+    //ocall_open_file(filename, O_WRONLY);
+    //save_weights_upto(net, filename, net->n);
+    //ocall_close_file();
+    save_weights_by_layer(net, filename, net->n);
 }
 
 void load_connected_weights(layer l, int fp, int transpose)

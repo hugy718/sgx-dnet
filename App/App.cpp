@@ -133,7 +133,7 @@ void test_tiny(char *cfgfile)
 
 void train_mnist(char *cfgfile)
 {
-
+    printf("enter mnist dataset training..\n");
     std::string img_path = MNIST_TRAIN_IMAGES;
     std::string label_path = MNIST_TRAIN_LABELS;
     data train = load_mnist_images(img_path);
@@ -217,8 +217,8 @@ int SGX_CDECL main(int argc, char *argv[])
     //Create NUM_THRREADS threads
     //std::thread trd[NUM_THREADS];
 
-    //train_cifar(CIFAR_CFG_FILE);
-    test_cifar(CIFAR_CFG_FILE);
+    train_cifar(CIFAR_CFG_FILE);
+    //test_cifar(CIFAR_CFG_FILE);
     //test_tiny(TINY_CFG);
     //train_mnist(MNIST_CFG);
     //test_mnist(MNIST_CFG);

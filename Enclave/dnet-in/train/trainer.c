@@ -4,9 +4,9 @@
 #include "trainer.h"
 #include "checks.h"
 
-#define CIFAR_WEIGHTS "/home/wuyuncheng/Documents/projects/sgx-dnet/App/dnet-out/backup/cifar.weights"
+#define CIFAR_WEIGHTS "/home/wuyuncheng/Documents/projects/sgx-dnet/App/dnet-out/backup/cifar-weights/"
 #define TINY_WEIGHTS "/home/wuyuncheng/Documents/projects/sgx-dnet/App/dnet-out/backup/tiny.weights"
-#define MNIST_WEIGHTS "/home/wuyuncheng/Documents/projects/sgx-dnet/App/dnet-out/backup/mnist.weights"
+#define MNIST_WEIGHTS "/home/wuyuncheng/Documents/projects/sgx-dnet/App/dnet-out/backup/mnist-weights/"
 
 //global network model
 //network *net = NULL;ste
@@ -55,6 +55,7 @@ void train_mnist(list *sections, data *training_data, int pmem)
     data train = *training_data;
     printf("Max batches: %d\n", net->max_batches);
     char *path = MNIST_WEIGHTS;
+    printf("mnist weights path: %s\n", path);
 
     while (cur_batch < net->max_batches || net->max_batches == 0)
     {
