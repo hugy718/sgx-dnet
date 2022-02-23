@@ -1,1 +1,21 @@
-./.vscode/
+# editors/ides
+.vscode
+.idea
+
+# Compiled Object files
+*.o
+
+# Compiled Dynamic libraries
+*.so
+
+# Compiled Static libraries
+*.a
+
+# SGX edger8r generated files
+Enclave_t.h
+Enclave_t.c
+Enclave_u.h
+Enclave_u.c
+
+# sample app
+app
