@@ -5,6 +5,8 @@
 list *make_list();
 int list_find(list *l, void *val);
 
+void *list_pop(list *l);
+
 void list_insert(list *, void *);
 
 

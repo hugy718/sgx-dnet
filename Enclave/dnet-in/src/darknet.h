@@ -21,6 +21,7 @@ extern "C" {
 
 extern int gpu_index;
 
+void free_section(section *s);
 metadata get_metadata(char *file);
 tree *read_tree(char *filename);
 void free_layer(layer);

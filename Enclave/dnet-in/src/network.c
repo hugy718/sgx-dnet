@@ -179,6 +179,7 @@ network *make_network(int n)
     network *net = calloc(1, sizeof(network));
     net->n = n;
     net->layers = calloc(net->n, sizeof(layer));
+    memset(net->layers, 0, net->n*sizeof(layer)); // to avoid free with uninitialized pointer
     net->seen = calloc(1, sizeof(size_t));
     net->t = calloc(1, sizeof(int));
     net->cost = calloc(1, sizeof(float));
