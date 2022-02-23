@@ -4,9 +4,9 @@
 #include "trainer.h"
 #include "checks.h"
 
-#define CIFAR_WEIGHTS "/home/wuyuncheng/Documents/projects/sgx-dnet/App/dnet-out/backup/cifar-weights/"
-#define TINY_WEIGHTS "/home/wuyuncheng/Documents/projects/sgx-dnet/App/dnet-out/backup/tiny.weights"
-#define MNIST_WEIGHTS "/home/wuyuncheng/Documents/projects/sgx-dnet/App/dnet-out/backup/mnist-weights/"
+#define CIFAR_WEIGHTS "./App/dnet-out/backup/cifar.weights"
+#define TINY_WEIGHTS "./App/dnet-out/backup/tiny.weights"
+#define MNIST_WEIGHTS "./App/dnet-out/backup/mnist.weights"
 
 //global network model
 //network *net = NULL;ste
@@ -132,8 +132,8 @@ void ecall_tester(list *sections, data *test_data, int pmem)
      * before any assignment 
      */
     sgx_lfence();
-    //test_mnist(sections, test_data, pmem);
-    test_cifar(sections, test_data, pmem);
+    test_mnist(sections, test_data, pmem);
+    // test_cifar(sections, test_data, pmem);
 }
 
 void ecall_classify(list *sections, list *labels, image *im)
