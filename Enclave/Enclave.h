@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 
-void empty_ecall();
+// void empty_ecall();
 
 
 

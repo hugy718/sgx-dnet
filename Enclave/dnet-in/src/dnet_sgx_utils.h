@@ -27,6 +27,7 @@
 //#define DNET_SGX_DEBUG //uncomment if you need more verbose output during training/debugging
 //#define SGX_OMP //OMP not used yet 
 
+/*
 #define PRINT_BLOCK()                    \
     {                                    \
         char buf[BUFSIZ] = {'\0'};       \
@@ -36,6 +37,8 @@
         va_end(ap);                      \
         ocall_print_string(buf);         \
     }
+*/
+#define PRINT_BLOCK(){}
 
 #define DEBUG_PRINT()                                 \
     {                                                 \

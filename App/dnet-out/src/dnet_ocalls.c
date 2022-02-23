@@ -13,13 +13,13 @@ FILE *write_fp = NULL;
 FILE *read_fp = NULL;
 //file descriptor used by open
 int fd;
-void ocall_print_string(const char *str)
-{
-    /* Proxy/Bridge will check the length and null-terminate
-     * the input string to prevent buffer overflow.
-     */
-    printf("%s", str);
-}
+// void ocall_print_string(const char *str)
+// {
+//     /* Proxy/Bridge will check the length and null-terminate
+//      * the input string to prevent buffer overflow.
+//      */
+//     printf("%s", str);
+// }
 
 /* Free section in untrusted memory*/
 void ocall_free_sec(section *sec)

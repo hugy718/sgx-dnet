@@ -22,10 +22,10 @@ void sgx_printf(const char *fmt, ...)
     PRINT_BLOCK();
 }
 
-void empty_ecall()
-{
-    sgx_printf("Inside empty ecall\n");
-}
+// void empty_ecall()
+// {
+//     sgx_printf("Inside empty ecall\n");
+// }
 
 void fread(void *ptr, size_t size, size_t nmemb, int fp)
 {
