@@ -153,8 +153,23 @@ void test_mnist(char *cfgfile)
 
     std::string img_path = MNIST_TEST_IMAGES;
     std::string label_path = MNIST_TEST_LABELS;
-    data test = load_mnist_images(img_path);
-    test.y = load_mnist_labels(label_path);
+    // data test = load_mnist_images(img_path);
+    data test = load_one_mnist_image(img_path);
+
+#ifndef NDEBUG
+    {
+      // print input as float array
+      matrix* X = &(test.X);
+      for (int i = 0; i < X->rows; i++) {
+        for (int j = 0; j < X->cols; j++) {
+          printf("DEBUG PRINT: %.2f, ", X->vals[i][j]);
+        }
+      }
+    }
+#endif // NDEBUG
+
+    // test.y = load_mnist_labels(label_path);
+    test.y = load_one_mnist_label();
     list *sections = read_cfg(cfgfile);
 
     // Record end time
@@ -163,7 +178,8 @@ void test_mnist(char *cfgfile)
     // Record end time
     auto test_finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> test_elapsed = test_finish - test_start;
-    std::cout << "Test 10k images inside enclave time: " << test_elapsed.count() << " s\n";
+    // std::cout << "Test 10k images inside enclave time: " << test_elapsed.count() << " s\n";
+    std::cout << "Test 1 image inside enclave time: " << test_elapsed.count() << " s\n";
 
     printf("Mnist testing complete..\n");
     free_data(test);

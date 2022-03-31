@@ -1339,6 +1339,14 @@ void load_connected_weights(layer l, int fp, int transpose)
     {
         transpose_matrix(l.weights, l.inputs, l.outputs);
     }
+#ifndef NDEBUG
+    ocall_sgxdnet_print_string("\nDEBUG PRINT: load FC\n");
+    ocall_sgxdnet_print_int(l.outputs);
+    ocall_sgxdnet_print_float(l.biases[0]);
+    ocall_sgxdnet_print_int(l.outputs * l.inputs);
+    ocall_sgxdnet_print_float(l.weights[0]);
+#endif // NDEBUG
+    
     //printf("Biases: %f mean %f variance\n", mean_array(l.biases, l.outputs), variance_array(l.biases, l.outputs));
     //printf("Weights: %f mean %f variance\n", mean_array(l.weights, l.outputs*l.inputs), variance_array(l.weights, l.outputs*l.inputs));
     if (l.batch_normalize && (!l.dontloadscales))
@@ -1349,7 +1357,16 @@ void load_connected_weights(layer l, int fp, int transpose)
         //printf("Scales: %f mean %f variance\n", mean_array(l.scales, l.outputs), variance_array(l.scales, l.outputs));
         //printf("rolling_mean: %f mean %f variance\n", mean_array(l.rolling_mean, l.outputs), variance_array(l.rolling_mean, l.outputs));
         //printf("rolling_variance: %f mean %f variance\n", mean_array(l.rolling_variance, l.outputs), variance_array(l.rolling_variance, l.outputs));
+#ifndef NDEBUG
+        ocall_sgxdnet_print_string("\nDEBUG PRINT: load FC sub\n");
+        ocall_sgxdnet_print_float(l.scales[0]);
+        ocall_sgxdnet_print_float(l.rolling_mean[0]);
+        ocall_sgxdnet_print_float(l.rolling_variance[0]);
+#endif // NDEBUG
     }
+#ifndef NDEBUG
+    ocall_sgxdnet_print_string("\nDEBUG PRINT: load FC\n");
+#endif // NDEBUG
 }
 
 void load_batchnorm_weights(layer l, int fp)
@@ -1357,6 +1374,16 @@ void load_batchnorm_weights(layer l, int fp)
     fread(l.scales, sizeof(float), l.c, fp);
     fread(l.rolling_mean, sizeof(float), l.c, fp);
     fread(l.rolling_variance, sizeof(float), l.c, fp);
+
+#ifndef NDEBUG
+    ocall_sgxdnet_print_string("\nDEBUG PRINT: load BN\n");
+    ocall_sgxdnet_print_int(l.c);
+    ocall_sgxdnet_print_float(l.scales[0]);
+    ocall_sgxdnet_print_float(l.rolling_mean[0]);
+    ocall_sgxdnet_print_float(l.rolling_variance[0]);
+    ocall_sgxdnet_print_string("\nDEBUG PRINT: load BN\n");
+#endif // NDEBUG
+
 }
 
 void load_convolutional_weights_binary(layer l, int fp)
@@ -1400,6 +1427,11 @@ void load_convolutional_weights(layer l, int fp)
         l.n = l.numload;
     int num = l.c / l.groups * l.n * l.size * l.size;
     fread(l.biases, sizeof(float), l.n, fp);
+#ifndef NDEBUG
+    ocall_sgxdnet_print_string("\nDEBUG PRINT: load Conv\n");
+    ocall_sgxdnet_print_int(l.n);
+    ocall_sgxdnet_print_float(l.biases[0]);
+#endif // NDEBUG
     if (l.batch_normalize && (!l.dontloadscales))
     {
         fread(l.scales, sizeof(float), l.n, fp);
@@ -1438,6 +1470,13 @@ void load_convolutional_weights(layer l, int fp)
             }
             printf("\n");
         }
+#ifndef NDEBUG
+        ocall_sgxdnet_print_string("\nDEBUG PRINT: load Conv (sub)\n");
+        ocall_sgxdnet_print_float(l.scales[0]);
+        ocall_sgxdnet_print_float(l.rolling_mean[0]);
+        ocall_sgxdnet_print_float(l.rolling_variance[0]);
+        ocall_sgxdnet_print_string("\nDEBUG PRINT: load Conv (sub)\n");
+#endif // NDEBUG
     }
     fread(l.weights, sizeof(float), num, fp);
     //if(l.c == 3) scal_cpu(num, 1./256, l.weights, 1);
@@ -1446,6 +1485,11 @@ void load_convolutional_weights(layer l, int fp)
         transpose_matrix(l.weights, l.c * l.size * l.size, l.n);
     }
     //if (l.binary) binarize_weights(l.weights, l.n, l.c*l.size*l.size, l.weights);
+#ifndef NDEBUG
+    ocall_sgxdnet_print_int(num);
+    ocall_sgxdnet_print_float(l.weights[0]);
+    ocall_sgxdnet_print_string("\nDEBUG PRINT: load Conv\n");
+#endif // NDEBUG
 }
 
 void load_weights_upto(network *net, char *filename, int start, int cutoff)
@@ -1463,9 +1507,22 @@ void load_weights_upto(network *net, char *filename, int start, int cutoff)
     fread(&major, sizeof(int), 1, fp);
     fread(&minor, sizeof(int), 1, fp);
     fread(&revision, sizeof(int), 1, fp);
+#ifndef NDEBUG  
+    ocall_sgxdnet_print_string("\nDEBUG PRINT: weight major, minor, revision\n");
+    ocall_sgxdnet_print_int(major);
+    ocall_sgxdnet_print_int(minor);
+    ocall_sgxdnet_print_int(revision);
+    ocall_sgxdnet_print_string("\nDEBUG PRINT: weight major, minor, revision\n");
+#endif // NDEBUG  
+
     if ((major * 10 + minor) >= 2 && major < 1000 && minor < 1000)
     {
         fread(net->seen, sizeof(size_t), 1, fp);
+#ifndef NDEBUG
+        ocall_sgxdnet_print_string("\nDEBUG PRINT: net seen\n");
+        ocall_sgxdnet_print_size_t(*net->seen);
+        ocall_sgxdnet_print_string("\nDEBUG PRINT: net seen\n");
+#endif // NDEBUG
     }
     else
     {
@@ -1540,6 +1597,14 @@ void load_weights_upto(network *net, char *filename, int start, int cutoff)
             int size = l.size * l.size * l.c * l.n * locations;
             fread(l.biases, sizeof(float), l.outputs, fp);
             fread(l.weights, sizeof(float), size, fp);
+#ifndef NDEBUG
+            ocall_sgxdnet_print_string("\nDEBUG PRINT: local layer bias and weights\n");
+            ocall_sgxdnet_print_int(l.outputs);
+            ocall_sgxdnet_print_float(l.biases[0]);
+            ocall_sgxdnet_print_int(size);
+            ocall_sgxdnet_print_float(l.weights[0]);
+            ocall_sgxdnet_print_string("\nDEBUG PRINT: local layer bias and weights\n");
+#endif // NDEBUG
         }
     }
 

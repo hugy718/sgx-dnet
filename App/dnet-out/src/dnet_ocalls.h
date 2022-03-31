@@ -31,6 +31,11 @@ extern "C"
     void ocall_free_sec(section *sec);
     void ocall_free_list(list *list);
     // void ocall_print_string(const char *str);
+#ifndef NDEBUG
+    void ocall_sgxdnet_print_float(float number);
+    void ocall_sgxdnet_print_int(int number);
+    void ocall_sgxdnet_print_size_t(size_t number);
+#endif // NDEBUG
     void ocall_open_file(const char *filename, flag oflag);
     void ocall_close_file();
     void ocall_fread(void *ptr, size_t size, size_t nmemb);

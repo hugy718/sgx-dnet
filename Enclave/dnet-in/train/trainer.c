@@ -171,9 +171,66 @@ void test_mnist(list *sections, data *test_data, int pmem)
     srand(12345);
     float avg_acc = 0;
     data test = *test_data;
-    float *acc = network_accuracies(net, test, 2);
-    avg_acc += acc[0];
-
+    // replace with the internal codes of network accuracies result
+    // float *acc = network_accuracies(net, test, 2);
+    // avg_acc += acc[0];
+    // ocall_sgxdnet_print_float(acc[0]);
+    {
+        int i, j, b;
+        int k = net->outputs;
+#ifndef NDEBUG
+        ocall_sgxdnet_print_string("net->outputs: ");
+        ocall_sgxdnet_print_int(k);
+#endif // NDEBUG
+        matrix pred = make_matrix(test.X.rows, k);
+        float *X = calloc(net->batch * test.X.cols, sizeof(float));
+        // the outerloop is not needed
+        // for (i = 0; i < net->batch; i += net->batch)
+        // {
+        //     for (b = 0; b < net->batch; ++b)
+        //     {
+        //         if (i + b == test.X.rows)
+        //             break;
+        //         memcpy(X + b * test.X.cols, test.X.vals[i + b], test.X.cols * sizeof(float));
+        //     }
+        //     float *out = network_predict(net, X);
+        //     for (b = 0; b < net->batch; ++b)
+        //     {
+        //         if (i + b == test.X.rows)
+        //             break;
+        //         for (j = 0; j < k; ++j)
+        //         {
+        //             pred.vals[i + b][j] = out[j + b * k];
+        //         }
+        //     }
+        // }
+        for (int i = 0; i < net->batch; ++i) {
+          if (i == test.X.rows) break;
+          memcpy(X + i * test.X.cols, test.X.vals[i], test.X.cols * sizeof(float));
+        }
+        float* out = network_predict(net, X);
+        for (int i = 0; i < net->batch; ++i) {
+          if (i == test.X.rows) break;
+          for (int j = 0; j < net->outputs; ++j) {
+            pred.vals[i][j] = out[j + i * (net->outputs)];
+          } 
+        } 
+        free(X);
+        // return pred;
+#ifndef NDEBUG
+        // print the pred matrix
+        ocall_sgxdnet_print_string("prediction matrix size (row X col)");
+        ocall_sgxdnet_print_int(pred.rows);
+        ocall_sgxdnet_print_int(pred.cols);
+        ocall_sgxdnet_print_string("prediction matrix size (row X col)");
+        for (i = 0; i < pred.rows; i++) {
+          for (j = 0; j < pred.cols; j++) {
+            ocall_sgxdnet_print_float(pred.vals[i][j]);
+          }
+        }
+#endif // NDEBUG
+    }
+    
     printf("Avg. accuracy: %f%%, %d images\n", avg_acc * 100, test.X.rows);
     free_network(net);
 

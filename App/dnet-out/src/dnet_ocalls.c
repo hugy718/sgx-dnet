@@ -21,6 +21,28 @@ int fd;
 //     printf("%s", str);
 // }
 
+#ifndef NDEBUG
+void ocall_sgxdnet_print_string(const char *str)
+{
+//     /* Proxy/Bridge will check the length and null-terminate
+//      * the input string to prevent buffer overflow.
+//      */
+    printf("%s", str);
+}
+
+void ocall_sgxdnet_print_float(float number) {
+  printf("DEBUG PRINT (float): %.2f, ", number);
+}
+
+void ocall_sgxdnet_print_int(int number) {
+  printf("DEBUG PRINT (int): %d, ", number);
+}
+
+void ocall_sgxdnet_print_size_t(size_t number) {
+  printf("DEBUG PRINT (size_t): %lu, ", number);
+}
+#endif // NDEBUG
+
 /* Free section in untrusted memory*/
 void ocall_free_sec(section *sec)
 {

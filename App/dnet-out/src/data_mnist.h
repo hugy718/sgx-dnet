@@ -34,5 +34,7 @@ extern "C"
 uint32_t swap_bytes(uint32_t *);
 data load_mnist_images(std::string path);
 matrix load_mnist_labels(std::string path);
+data load_one_mnist_image(std::string path);
+matrix load_one_mnist_label();
 
 #endif /* DATA_MNIST_H */

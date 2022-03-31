@@ -99,6 +99,73 @@ data load_mnist_images(std::string path)
     return d;
 }
 
+data load_one_mnist_image(std::string path)
+{
+
+    // Read file
+    std::ifstream file(path, std::ios::binary);
+
+    uint32_t magic_num = 0;
+    uint32_t num_images = 0;
+    uint32_t rows = 0;
+    uint32_t cols = 0;
+    uint32_t image_size = 0;
+
+    // Read the magic num (file signature) and dataset meta data
+    /* if (!file.is_open)
+        ERROR(); */
+    file.read(reinterpret_cast<char *>(&magic_num), sizeof(magic_num));
+    magic_num = swap_bytes(magic_num);
+
+    // if (magic_num != 2051)
+    //     throw std::runtime_error("Invalid MNIST image file!");
+
+    file.read((char *)&num_images, sizeof(num_images));
+    num_images = swap_bytes(num_images);
+    file.read((char *)&rows, sizeof(rows));
+    rows = swap_bytes(rows);
+    file.read((char *)&cols, sizeof(cols));
+    cols = swap_bytes(cols);
+
+    image_size = rows * cols;
+
+    //create data matrices
+    data d = {0};
+    d.shallow = 0;
+    matrix X = make_matrix(1, image_size); //images
+
+    unsigned char temp = 0;
+#ifndef NDEBUG
+    printf("the first instance: (hex): ");
+#endif // NDEBUG
+    //copy byte by byte into X.vals
+    for (int j = 0; j < image_size; j++)
+    {
+        file.read((char *)&temp, sizeof(temp));            
+        X.vals[0][j] = (float)temp;
+#ifndef NDEBUG
+        printf("%02hhx", temp);
+#endif // NDEBUG
+    }
+#ifndef NDEBUG
+    printf("\n");
+#endif // NDEBUG
+       
+    //make X the image data values of d
+    d.X = X;
+    scale_data_rows(d, 1. / 255);
+    //print_matrix(X);
+    file.close();   
+    return d;
+}
+
+// the first label is 7
+matrix load_one_mnist_label() {
+  matrix Y = make_matrix(1, NUM_CLASSES);
+  Y.vals[0][7] = 1;
+  return Y;
+}
+
 matrix load_mnist_labels(std::string path)
 {
     // Read file
